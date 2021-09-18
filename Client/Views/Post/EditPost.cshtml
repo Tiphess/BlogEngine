@@ -1,0 +1,66 @@
+﻿@model Client.Models.EditPostViewModel
+
+@{
+    ViewData["Title"] = "Edit a post";
+}
+
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h3>Edit Post</h3>
+        </div>
+        <div class="card-body">
+            @using (Html.BeginForm("EditPost", "Post", FormMethod.Post))
+            {
+                @Html.Hidden("Id", Model.Id)
+                <div class="row mb-2">
+                    <div class="col-xl-2 col-lg-2 col-md-12">
+                        <label for="title">Title</label>
+                    </div>
+                    <div class="col-xl-10 col-lg-10">
+                        <input id="title" name="Title" type="text" class="form-control" required value="@Model.Title" />
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-xl-2 col-lg-2 col-md-12">
+                        <label for="category">Category</label>
+                    </div>
+                    <div class="col-xl-10 col-lg-10">
+                        <select id="category" name="CategoryId" class="form-control" required>
+                            <option> - Select a category - </option>
+                            @foreach (var category in Model.Categories)
+                            {
+                                if (category.Id == Model.CategoryId)
+                                {
+                                    <option value="@category.Id" selected="selected">@category.Title</option>
+                                }
+                                else
+                                {
+                                    <option value="@category.Id">@category.Title</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-xl-2 col-lg-2 col-md-12">
+                        <label for="publicationDate">Publication Date</label>
+                    </div>
+                    <div class="col-xl-10 col-lg-10">
+                        <input id="publicationDate" name="PublicationDate" type="text" class="form-control" placeholder="yyyy-mm-dd" required 
+                               value="@Model.PublicationDate.ToShortDateString()"/>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label for="content">Content</label>
+                    <textarea id="content" name="Content" class="form-control" required>@Model.Content</textarea>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script src="~/js/post.js" asp-append-version="true"></script>
