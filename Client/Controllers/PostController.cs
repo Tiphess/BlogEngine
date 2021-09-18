@@ -7,6 +7,8 @@ using Data.DTOs;
 using Data.Entities;
 using Data.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,21 +31,47 @@ namespace Client.Controllers
         }
 
         [HttpGet]
-        public IActionResult AddPost()
+        public IActionResult Add()
         {
-            var model = _service.Request<IEnumerable<CategoryDTO>>(HttpMethod.Get, UriProvider.Category.GET_LIST);
+            if (TempData[Constants.ACTION_MESSAGE] != null)
+                ViewBag.Error = TempData[Constants.ACTION_MESSAGE];
+
+            PostForm form = null;
+            if (TempData[Constants.POST_FORM] != null)
+                form = JsonConvert.DeserializeObject<PostForm>((string)TempData[Constants.POST_FORM]);
+
+            var model = new AddPostViewModel
+            {
+                Categories = _service.Request<IEnumerable<CategoryDTO>>(HttpMethod.Get, UriProvider.Category.GET_LIST),
+                Form = form
+            };
+
             return View(model);
         }
 
         [HttpGet]
-        public IActionResult EditPost(Guid id)
+        public IActionResult Edit(Guid id)
         {
+            if (TempData[Constants.ACTION_MESSAGE] != null)
+                ViewBag.Error = TempData[Constants.ACTION_MESSAGE];
+
             var post = _service.Request<PostDTO>(HttpMethod.Get, UriProvider.Post.GetById(id));
 
             var model = _mapper.Map<EditPostViewModel>(post);
             model.Categories = _service.Request<IEnumerable<CategoryDTO>>(HttpMethod.Get, UriProvider.Category.GET_LIST);
 
             return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult IsUniqueTitle(string title, Guid? id = null)
+        {
+            var posts = _service.Request<IEnumerable<PostDTO>>(HttpMethod.Get, UriProvider.Post.GET_LIST);
+
+            if (id.HasValue)
+                return Json(!posts.Any(p => p.Title == title && p.Id != id));
+
+            return Json(!posts.Any(p => p.Title == title));
         }
 
         [HttpPost]
@@ -56,7 +84,9 @@ namespace Client.Controllers
             }
             catch (Exception)
             {
-                TempData[Constants.ACTION_MESSAGE] = "Add Post Failed";
+                TempData[Constants.ACTION_MESSAGE] = "Add Post failed.";
+                TempData[Constants.POST_FORM] = JsonConvert.SerializeObject(form);
+                return RedirectToAction("Add", "Post");
             }
 
             return RedirectToAction("Index", "Home");
@@ -72,7 +102,8 @@ namespace Client.Controllers
             }
             catch (Exception)
             {
-                TempData[Constants.ACTION_MESSAGE] = "Edit Post Failed";
+                TempData[Constants.ACTION_MESSAGE] = "Edit Post failed.";
+                return RedirectToAction("Edit", "Post", new { id = form.Id });
             }
 
             return RedirectToAction("Index", "Home");

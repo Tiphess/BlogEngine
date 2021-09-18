@@ -7,6 +7,7 @@ using Data.DTOs;
 using Data.Entities;
 using Data.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,16 +30,37 @@ namespace Client.Controllers
         }
 
         [HttpGet]
-        public IActionResult AddCategory()
+        public IActionResult Add()
         {
-            return View();
+            if (TempData[Constants.ACTION_MESSAGE] != null)
+                ViewBag.Error = TempData[Constants.ACTION_MESSAGE];
+
+            CategoryForm form = null;
+            if (TempData[Constants.CATEGORY_FORM] != null)
+                form = JsonConvert.DeserializeObject<CategoryForm>((string)TempData[Constants.CATEGORY_FORM]);
+
+            return View(form);
         }
 
         [HttpGet]
-        public IActionResult EditCategory(Guid id)
+        public IActionResult Edit(Guid id)
         {
+            if (TempData[Constants.ACTION_MESSAGE] != null)
+                ViewBag.Error = TempData[Constants.ACTION_MESSAGE];
+
             var model = _service.Request<CategoryDTO>(HttpMethod.Get, UriProvider.Category.GetById(id));
             return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult IsUniqueTitle(string title, Guid? id = null)
+        {
+            var categories = _service.Request<IEnumerable<CategoryDTO>>(HttpMethod.Get, UriProvider.Category.GET_LIST);
+
+            if (id.HasValue)
+                return Json(!categories.Any(c => c.Title == title && c.Id != id));
+
+            return Json(!categories.Any(c => c.Title == title));
         }
 
         [HttpPost]
@@ -51,7 +73,9 @@ namespace Client.Controllers
             }
             catch (Exception)
             {
-                TempData[Constants.ACTION_MESSAGE] = "Add Category Failed";
+                TempData[Constants.ACTION_MESSAGE] = "Add Category failed.";
+                TempData[Constants.CATEGORY_FORM] = JsonConvert.SerializeObject(form);
+                return RedirectToAction("Add", "Category");
             }
 
             return RedirectToAction("Index", "Home");
@@ -67,7 +91,8 @@ namespace Client.Controllers
             }
             catch (Exception)
             {
-                TempData[Constants.ACTION_MESSAGE] = "Add Category Failed";
+                TempData[Constants.ACTION_MESSAGE] = "Edit Category failed.";
+                return RedirectToAction("Edit", "Category", new { id = form.Id });
             }
 
             return RedirectToAction("Index", "Home");

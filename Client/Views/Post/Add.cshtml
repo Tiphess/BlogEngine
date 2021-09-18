@@ -1,0 +1,80 @@
+﻿@model Client.Models.AddPostViewModel
+
+@{
+    ViewData["Title"] = "Add a new post";
+}
+
+<div class="container">
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @ViewBag.Error
+            <button type="button" class="close" data-dismiss="alert">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+    <div id="warning" class="alert alert-warning alert-dismissible" style="display: none" role="alert">
+        <span id="alert-text"></span>
+        <button type="button" class="close" data-dismiss="alert">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h3>Add Post</h3>
+        </div>
+        <div class="card-body">
+            @using (Html.BeginForm("AddPost", "Post", FormMethod.Post, new { id = "PostForm" }))
+            {
+                <div class="row mb-2">
+                    <div class="col-xl-2 col-lg-2 col-md-12">
+                        <label for="title">Title</label>
+                    </div>
+                    <div class="col-xl-10 col-lg-10">
+                        <input id="title" name="Title" type="text" class="form-control" value="@Model.Form?.Title" required />
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-xl-2 col-lg-2 col-md-12">
+                        <label for="category">Category</label>
+                    </div>
+                    <div class="col-xl-10 col-lg-10">
+                        <select id="category" name="CategoryId" class="form-control" required>
+                            <option selected="@(Model.Form == null ? "selected" : "")" value="0"> - Select a category - </option>
+                            @foreach (var category in Model.Categories)
+                            {
+                                if (category.Id == Model.Form?.CategoryId)
+                                {
+                                    <option value="@category.Id" selected="selected">@category.Title</option>
+                                }
+                                else
+                                {
+                                    <option value="@category.Id">@category.Title</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-xl-2 col-lg-2 col-md-12">
+                        <label for="publicationDate">Publication Date</label>
+                    </div>
+                    <div class="col-xl-10 col-lg-10">
+                        <input id="publicationDate" name="PublicationDate" type="text" class="form-control" placeholder="yyyy-mm-dd" required
+                               value="@Model.Form?.PublicationDate.Value.ToShortDateString()"/>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label for="content">Content</label>
+                    <textarea id="content" name="Content" class="form-control" required>@Model.Form?.Content</textarea>
+                </div>
+                <div>
+                    <button id="savePost" type="submit" class="btn btn-primary">Save</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script src="~/js/post.js" asp-append-version="true"></script>

@@ -14,7 +14,7 @@ namespace Client.Models
         [Required]
         public Guid CategoryId { get; set; }
         [Required]
-        public DateTime PublicationDate { get; set; }
+        public DateTime? PublicationDate { get; set; }
         [Required]
         public string Content { get; set; }
     }

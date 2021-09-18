@@ -8,5 +8,7 @@ namespace Client.Utils
     public static class Constants
     {
         public const string ACTION_MESSAGE = "actionMessage";
+        public const string POST_FORM = "postForm";
+        public const string CATEGORY_FORM = "categoryForm";
     }
 }

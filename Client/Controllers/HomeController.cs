@@ -29,9 +29,6 @@ namespace Client.Controllers
 
         public IActionResult Index()
         {
-            if (TempData[Constants.ACTION_MESSAGE] != null)
-                ViewBag.Error = TempData[Constants.ACTION_MESSAGE];
-
             var model = new IndexViewModel
             {
                 Posts = _service.Request<IEnumerable<PostDTO>>(HttpMethod.Get, UriProvider.Post.GET_LIST),
